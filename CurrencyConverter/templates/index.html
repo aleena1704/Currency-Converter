@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Currency Converter</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            💱 Currency Converter
+        </div>
+
+        <div class="nav-links">
+            <a href="#converter">Converter</a>
+            <a href="#chart-section">Chart</a>
+            <a href="#features">Features</a>
+        </div>
+
+    </nav>
+
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+        <h1>Currency Converter</h1>
+
+        <p>
+            Convert currencies quickly and easily.
+        </p>
+
+    </section>
+
+
+    <!-- CONVERTER -->
+
+    <section class="converter-section" id="converter">
+
+        <div class="converter-card">
+
+            <h2>Currency Conversion</h2>
+
+            <p class="subtitle">
+                Enter an amount and select the countries.
+            </p>
+
+
+            <!-- AMOUNT -->
+
+            <div class="input-group">
+
+                <label for="amount">
+                    Amount
+                </label>
+
+                <input
+                    type="number"
+                    id="amount"
+                    placeholder="Enter amount"
+                    min="0"
+                    step="any"
+                >
+
+            </div>
+
+
+            <!-- FROM / TO -->
+
+            <div class="currency-row">
+
+                <div class="currency-box">
+
+                    <label>
+                        From Country
+                    </label>
+
+                    <select id="fromCurrency">
+
+                        <option value="">
+                            Select country
+                        </option>
+
+                        {% for country in countries %}
+
+                        <option
+                            value="{{ country.currency }}"
+                            data-country="{{ country.name }}"
+                            data-currency-name="{{ country.currency_name }}"
+                            data-symbol="{{ country.symbol }}"
+                        >
+
+                            {{ country.name }}
+                            — {{ country.currency }}
+                            ({{ country.symbol }})
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                    <small id="fromInfo">
+                        Select a country
+                    </small>
+
+                </div>
+
+
+                <button
+                    class="swap-button"
+                    onclick="swapCurrencies()"
+                    title="Swap currencies"
+                >
+                    ⇄
+                </button>
+
+
+                <div class="currency-box">
+
+                    <label>
+                        To Country
+                    </label>
+
+                    <select id="toCurrency">
+
+                        <option value="">
+                            Select country
+                        </option>
+
+                        {% for country in countries %}
+
+                        <option
+                            value="{{ country.currency }}"
+                            data-country="{{ country.name }}"
+                            data-currency-name="{{ country.currency_name }}"
+                            data-symbol="{{ country.symbol }}"
+                        >
+
+                            {{ country.name }}
+                            — {{ country.currency }}
+                            ({{ country.symbol }})
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                    <small id="toInfo">
+                        Select a country
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <!-- CONVERT BUTTON -->
+
+            <button
+                class="convert-button"
+                onclick="convertCurrency()"
+            >
+                Convert Currency
+            </button>
+
+
+            <!-- LOADING -->
+
+            <div
+                id="loading"
+                class="loading"
+            >
+                Converting...
+            </div>
+
+
+            <!-- ERROR -->
+
+            <div
+                id="errorMessage"
+                class="error-message"
+            ></div>
+
+
+            <!-- RESULT -->
+
+            <div
+                id="resultBox"
+                class="result-box"
+            >
+
+                <div class="result-title">
+                    Converted Amount
+                </div>
+
+                <div id="resultAmount">
+                    —
+                </div>
+
+                <div id="exchangeRate">
+                    —
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- CHART -->
+
+    <section
+        class="chart-section"
+        id="chart-section"
+    >
+
+        <div class="chart-card">
+
+            <h2>Currency Exchange Chart</h2>
+
+            <p class="subtitle">
+                View exchange-rate data for your selected currencies.
+            </p>
+
+
+            <div class="chart-controls">
+
+                <select id="chartFrom">
+
+                    <option value="">
+                        From Currency
+                    </option>
+
+                    {% for country in countries %}
+
+                    <option value="{{ country.currency }}">
+                        {{ country.name }} — {{ country.currency }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+
+                <select id="chartTo">
+
+                    <option value="">
+                        To Currency
+                    </option>
+
+                    {% for country in countries %}
+
+                    <option value="{{ country.currency }}">
+                        {{ country.name }} — {{ country.currency }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+
+                <button
+                    onclick="loadChart()"
+                    class="chart-button"
+                >
+                    Show Chart
+                </button>
+
+            </div>
+
+
+            <div
+                id="chartError"
+                class="error-message"
+            ></div>
+
+
+            <div class="chart-container">
+
+                <canvas id="currencyChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- FEATURES -->
+
+    <section
+        class="features"
+        id="features"
+    >
+
+        <h2>Features</h2>
+
+        <div class="feature-grid">
+
+            <div class="feature-card">
+
+                <div class="feature-icon">
+                    🌍
+                </div>
+
+                <h3>Many Countries</h3>
+
+                <p>
+                    Choose from a large list of countries and currencies.
+                </p>
+
+            </div>
+
+
+            <div class="feature-card">
+
+                <div class="feature-icon">
+                    ⚡
+                </div>
+
+                <h3>Quick Conversion</h3>
+
+                <p>
+                    Convert your amount quickly using current exchange rates.
+                </p>
+
+            </div>
+
+
+            <div class="feature-card">
+
+                <div class="feature-icon">
+                    🔄
+                </div>
+
+                <h3>Easy Swap</h3>
+
+                <p>
+                    Quickly swap the source and destination currencies.
+                </p>
+
+            </div>
+
+
+            <div class="feature-card">
+
+                <div class="feature-icon">
+                    📊
+                </div>
+
+                <h3>Exchange Chart</h3>
+
+                <p>
+                    View exchange-rate information using a simple chart.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <p>
+            © 2026 Currency Converter | Web Development Project
+        </p>
+
+    </footer>
+
+
+    <!-- JAVASCRIPT -->
+
+    <script>
+
+        let currencyChart = null;
+
+
+        // ----------------------------------------------------
+        // UPDATE COUNTRY INFORMATION
+        // ----------------------------------------------------
+
+        document
+            .getElementById("fromCurrency")
+            .addEventListener("change", function () {
+
+                const option =
+                    this.options[this.selectedIndex];
+
+                document.getElementById("fromInfo").textContent =
+                    option.dataset.currencyName
+                    ? option.dataset.currencyName +
+                      " (" +
+                      option.dataset.symbol +
+                      ")"
+                    : "Select a country";
+
+            });
+
+
+        document
+            .getElementById("toCurrency")
+            .addEventListener("change", function () {
+
+                const option =
+                    this.options[this.selectedIndex];
+
+                document.getElementById("toInfo").textContent =
+                    option.dataset.currencyName
+                    ? option.dataset.currencyName +
+                      " (" +
+                      option.dataset.symbol +
+                      ")"
+                    : "Select a country";
+
+            });
+
+
+        // ----------------------------------------------------
+        // CONVERT
+        // ----------------------------------------------------
+
+        async function convertCurrency() {
+
+            const amount =
+                document.getElementById("amount").value;
+
+            const fromCurrency =
+                document.getElementById("fromCurrency").value;
+
+            const toCurrency =
+                document.getElementById("toCurrency").value;
+
+            const resultBox =
+                document.getElementById("resultBox");
+
+            const resultAmount =
+                document.getElementById("resultAmount");
+
+            const exchangeRate =
+                document.getElementById("exchangeRate");
+
+            const errorMessage =
+                document.getElementById("errorMessage");
+
+            const loading =
+                document.getElementById("loading");
+
+
+            errorMessage.textContent = "";
+
+            resultBox.style.display = "none";
+
+
+            if (!amount || Number(amount) <= 0) {
+
+                errorMessage.textContent =
+                    "Please enter a valid amount.";
+
+                return;
+            }
+
+
+            if (!fromCurrency || !toCurrency) {
+
+                errorMessage.textContent =
+                    "Please select both countries.";
+
+                return;
+            }
+
+
+            loading.style.display = "block";
+
+
+            try {
+
+                const response =
+                    await fetch("/convert", {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+
+                            amount:
+                                Number(amount),
+
+                            from_currency:
+                                fromCurrency,
+
+                            to_currency:
+                                toCurrency
+
+                        })
+
+                    });
+
+
+                const data =
+                    await response.json();
+
+
+                if (!data.success) {
+
+                    errorMessage.textContent =
+                        data.message;
+
+                    return;
+                }
+
+
+                const toOption =
+                    document
+                    .getElementById("toCurrency")
+                    .options[
+                        document
+                        .getElementById("toCurrency")
+                        .selectedIndex
+                    ];
+
+
+                const symbol =
+                    toOption.dataset.symbol || "";
+
+
+                resultAmount.textContent =
+                    symbol +
+                    " " +
+                    Number(data.result)
+                    .toLocaleString(
+                        undefined,
+                        {
+                            maximumFractionDigits: 2
+                        }
+                    );
+
+
+                exchangeRate.textContent =
+                    "1 " +
+                    data.from +
+                    " = " +
+                    Number(data.rate)
+                    .toLocaleString(
+                        undefined,
+                        {
+                            maximumFractionDigits: 6
+                        }
+                    ) +
+                    " " +
+                    data.to;
+
+
+                resultBox.style.display = "block";
+
+            }
+
+            catch (error) {
+
+                console.error(error);
+
+                errorMessage.textContent =
+                    "Something went wrong. Please check your internet connection and try again.";
+
+            }
+
+            finally {
+
+                loading.style.display = "none";
+
+            }
+
+        }
+
+
+        // ----------------------------------------------------
+        // SWAP
+        // ----------------------------------------------------
+
+        function swapCurrencies() {
+
+            const from =
+                document.getElementById("fromCurrency");
+
+            const to =
+                document.getElementById("toCurrency");
+
+
+            const temporary =
+                from.value;
+
+            from.value =
+                to.value;
+
+            to.value =
+                temporary;
+
+
+            from.dispatchEvent(
+                new Event("change")
+            );
+
+            to.dispatchEvent(
+                new Event("change")
+            );
+
+        }
+
+
+        // ----------------------------------------------------
+        // CHART
+        // ----------------------------------------------------
+
+        async function loadChart() {
+
+            const from =
+                document.getElementById("chartFrom").value;
+
+            const to =
+                document.getElementById("chartTo").value;
+
+            const error =
+                document.getElementById("chartError");
+
+
+            error.textContent = "";
+
+
+            if (!from || !to) {
+
+                error.textContent =
+                    "Please select both currencies.";
+
+                return;
+            }
+
+
+            if (from === to) {
+
+                error.textContent =
+                    "Please select two different currencies.";
+
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch("/chart", {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+
+                            from_currency: from,
+
+                            to_currency: to
+
+                        })
+
+                    });
+
+
+                const data =
+                    await response.json();
+
+
+                if (!data.success) {
+
+                    error.textContent =
+                        data.message;
+
+                    return;
+                }
+
+
+                if (!data.labels.length) {
+
+                    error.textContent =
+                        "No chart data is available.";
+
+                    return;
+                }
+
+
+                const canvas =
+                    document.getElementById(
+                        "currencyChart"
+                    );
+
+
+                if (currencyChart) {
+
+                    currencyChart.destroy();
+
+                }
+
+
+                currencyChart =
+                    new Chart(canvas, {
+
+                        type: "line",
+
+                        data: {
+
+                            labels:
+                                data.labels,
+
+                            datasets: [{
+
+                                label:
+                                    "1 " +
+                                    data.from +
+                                    " → " +
+                                    data.to,
+
+                                data:
+                                    data.values,
+
+                                borderWidth: 3,
+
+                                tension: 0.3,
+
+                                fill: true
+
+                            }]
+
+                        },
+
+                        options: {
+
+                            responsive: true,
+
+                            maintainAspectRatio: false,
+
+                            plugins: {
+
+                                legend: {
+                                    display: true
+                                }
+
+                            },
+
+                            scales: {
+
+                                y: {
+
+                                    beginAtZero: false
+
+                                }
+
+                            }
+
+                        }
+
+                    });
+
+            }
+
+            catch (error) {
+
+                console.error(error);
+
+                document
+                    .getElementById("chartError")
+                    .textContent =
+                    "Unable to load chart. Check your internet connection.";
+
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>
